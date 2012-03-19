@@ -1,0 +1,26 @@
+td.cashbox_credit {
+  color: #33bb33;
+  font-weight: bold;
+}
+
+td.cashbox_debit {
+  color: #bb3333;
+  font-weight: bold;
+}
+
+div.cashbox_amount {
+	float: right;
+}
+div.cashbox_symbol {
+	float: left;
+}
+.cashbox_message {
+	margin-top: 0.5em;
+	font-style: italic;
+}
+.cashbox_date {
+	white-space: nowrap;
+}
+.cashbox_checksum {
+	display: none;
+}

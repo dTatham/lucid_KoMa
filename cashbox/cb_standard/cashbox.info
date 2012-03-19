@@ -1,0 +1,12 @@
+name = Cashbox
+description = Simple accounting / bookkeeping module for small communities
+core = 7.x
+package = "Cashbox"
+configure = admin/config/cashbox
+#dependencies[] = trigger
+
+files[] = cashbox.admin.inc
+scripts[] = cashbox.callback.js
+scripts[] = jquery.url.js
+files[] = cashbox.css
+files[] = cashbox_print.css

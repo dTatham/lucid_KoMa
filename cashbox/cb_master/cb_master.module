@@ -1,0 +1,267 @@
+<?php
+
+/**
+ * Implement hook_permission()
+ */
+function cb_master_permission() {
+	return array(
+		'cb_master add_master' => array(
+			'title'	=> t('Add new Master'),
+			'description' => t('Create a new Master Account')),
+		'cb_master transfer_from' => array(
+			'title'	=> t('Allow outgoing transfers'),
+			'description' => t('User may transfer currency from an assigned Master Account')),
+	);
+}
+
+
+class cbMaster {
+	public $uid;
+	public $name;
+	public $master = true;
+	public $groups;
+
+	function __construct($cashbox) {
+		$data = _cb_master_list();
+
+		if (is_numeric($cashbox)) {
+			if (isset($data[(int)$cashbox])) {
+				$this->uid = (int)$cashbox;
+				$this->name = $data[$cashbox];
+				}       
+			return;
+		}       
+
+		foreach ($data as $id=>$name) {
+			if (!strcmp($cashbox, $name)) {
+				$this->uid = $id;
+				$this->name = $name;
+				}       
+			}
+		}
+}
+
+/**
+ * Implements hook_menu()
+ */
+function cb_master_menu() {
+	global $user;
+	$items = array();
+
+	$items['admin/config/cashbox.master'] = array(
+		'title'	=> 'Cashbox Admin',
+		'description' => 'Configure Cashbox Masters',
+		'access arguments' => array('access administration pages'),
+		'page callback' => 'cb_master_admin',
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'cb_master.admin.inc',
+	);
+	$items['admin/config/cashbox.master/new'] = array(
+		'title'	=> 'Create New Master Account',
+		'access arguments' => array('cb_master add_master'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cb_master_dispatch'),
+		'type' => MENU_CALLBACK,
+		'file' => 'cb_master.admin.inc',
+	);
+ 	$items['admin/config/cashbox.master/edit/%'] = array(
+		'title' => 'Edit Master Account',
+		'access arguments' => array('cb_master edit_master'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cb_master_dispatch', 4),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'cb_master.admin.inc',
+	);
+	$items['admin/config/cashbox.master/delete/%'] = array(
+		'title' => 'Delete Master Account',
+		'access arguments' => array('cb_master delete_master'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cb_master_delete', 4),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'cb_master.admin.inc',
+	);
+	$items['cashbox/master/callback/autocomplete'] = array(
+		'title'	=> 'Callback for Master-Account names',
+		'access arguments' => array('view keyword autocomplete'),
+		'page callback'	=> '_cb_master_callback_autocomplete',
+		'type' => MENU_CALLBACK,
+	);
+	$items['cashbox/master/books'] = array(
+		'title'         => t('Account Journal'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cb_master_books'),
+		'access callback' => '_cb_master_check_access',
+#		'access arguments' => array($user),
+		'type'  => MENU_NORMAL_ITEM,
+		'menu_name'     => 'user-menu',
+	);
+	$items['cashbox/master/books/callback/%'] = array(
+		'title'         => t('Account Journal'),
+		'page callback' => '_cb_master_books_ajax',
+		'page arguments' => array(4),
+		'access callback' => '_cb_master_check_access',
+		'type'  => MENU_CALLBACK,
+	);
+
+return $items;
+}
+
+/**
+ * Check if user has a role which is associated to a Master-Account
+ *
+ * @param user
+ * 	Loaded-User Object
+ */
+function _cb_master_check_access($book= false) {
+	if (!db_table_exists('cashbox_masters')) 
+		return false;
+
+	global $user;
+
+	$query = db_select('cashbox_masters', 'c')->fields('c', array('cbm_id', 'account_group'));	
+		$condition = db_or();
+
+	if ($book == false) {
+		foreach ($user->roles as $rid=>$rname)
+			$condition->condition('account_group', '%' . $rid . '%', 'LIKE');
+	} else {
+		$condition->condition('account_group', '%' . $book . '%', 'LIKE');
+	}
+
+	
+	$result = $query->condition($condition)->execute()->fetchAll();
+
+	foreach ($result as $match) {
+		foreach (explode('|', $match->account_group) as $set)
+			if (isset($user->roles[$set])) 
+				return true;
+	}
+
+	return false;
+}
+
+function cb_master_books($form, &$form_state) {
+	global $user;
+	$available_accs = array('0' => t('Select Master Account'));
+	$query = db_select('cashbox_masters', 'c')->fields('c', array('cbm_id', 'account_name', 'account_group', 'current_balance'));
+	$condition = db_or();
+	foreach ($user->roles as $rid=>$role) 
+		$condition->condition('account_group', '%' . $rid . '%', 'LIKE');
+
+	$result = $query->condition($condition)->execute();
+
+	while ($row = $result->fetchAssoc()) {
+		foreach (explode('|', $row['account_group']) as $ass_role)
+			if (isset($user->roles[$ass_role])) {
+				$available_accs[$row['cbm_id']] =  $row['account_name'] . " \t(" . variable_get('cashbox_symbol', '$') . ' ' . number_format($row['current_balance'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . ')';
+			}
+	}
+
+	drupal_add_js(drupal_get_path('module', 'cashbox') . '/jquery.url.js');
+	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox.css');
+	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox_print.css', array('media' => 'print'));
+	drupal_add_js(drupal_get_path('module', 'cb_master') . '/cb_callback.js');
+
+	$form['selected_acc'] = array(
+		'#type'		=> 'select',
+		'#options'	=> $available_accs,
+		'#attributes'	=> array('class' => array('cashbox_qr'), 'onchange' => 'initializeTableMaster(this.value)'),
+	);	
+	$form['books_display'] = array(
+		'#type'		=> 'markup',
+		'#markup'	=> '<div id="books_display-div"> </div>',
+	);
+
+
+	return $form;
+}
+
+function _cb_master_books_display($form, $form_state) {
+	drupal_add_js('initializeTableMaster(' . $form_state['values']['selected_acc'] . ');', 'inline');
+	return;
+}
+
+function _cb_master_books_ajax($acc = false) {
+        header("Content-type: text/html");
+	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+
+	$cbM = new cbMaster($acc);
+
+
+	$total = db_query('SELECT COUNT(tid) FROM {cashbox} WHERE cashbox.debited = :cbM OR cashbox.credited = :cbM', array(':cbM' => $cbM->name))->fetchField();
+	$page = pager_default_initialize($total, variable_get('cashbox_perPage', 25));
+
+        $header = _cashbox_get_header(false, true, true);
+	$balances = _cashbox_fetch($cbM->name, variable_get('cashbox_perPage', 25), $header);
+
+	$rows = array();
+	foreach ($balances as $balance) 
+		$rows[$balance->tid] = _cashbox_format($balance, $cbM, true, true);
+
+	$html = theme('table',  array(
+		'header'        => $header,
+		'empty'         => t('No transactions available'),
+		'rows'          => $rows,
+		'sticky'        => true,
+		'caption'       => t('Transactions for @master', array('@master' => $cbM->name)),
+		)
+	);
+	$html .= theme('pager', array('path' => array('href' =>'foo'), '#ajax' => 'foo'));
+
+	die($html);
+}
+/**
+ * Returns an associated array with cbm_id (the ID-Number of the Master account) and cbm_name (the human-readable name of the Master account)
+ *
+ */
+function _cb_master_list() {
+	$raw = db_query('SELECT cbm_id, account_name FROM cashbox_masters')->fetchAll();
+	$masters = array();
+
+	foreach ($raw as $line)
+		$masters[$line->cbm_id] = $line->account_name;
+
+	return $masters;
+}
+
+/**
+ * Check if $para is a Master-Account
+ */
+function cb_master_is_master_by_id($para) {
+	$data = _cb_master_list();
+	if (isset($data[$para])) 
+		return true;
+
+	return false;
+}
+
+function cb_master_is_master($para) {
+	$data = _cb_master_list();
+	/* Loop through Master-Accounts until name matches */
+	foreach ($data as $id => $cbm_name) {
+		if (!strcmp($cbm_name, $para)) 
+			return true;
+	}
+
+	return false;
+}
+
+/**
+ * AJAX-Callback function that delivers ONLY a list of Master Accounts (as opposed to the one defined in cb_standard, which delivers both)
+ *
+ */
+function _cb_master_callback_autocomplete($string = '') {
+	if ($string) {
+		$result = db_select('cashbox_masters')->fields('cashbox_masters', array('account_name'))->condition('account_name', db_like($string) . '%', 'LIKE')->range(0, 10)->execute();
+
+		foreach ($result as $master) {
+			$matches[$master->account_name] = '<strong>' . check_plain($master->account_name) . '</strong>';
+		}
+
+	}
+
+        drupal_json_output($matches);
+}

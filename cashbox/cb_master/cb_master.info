@@ -1,0 +1,10 @@
+name = Cashbox Masters
+description = Master Accounts (not associated with user-accounts)
+core = 7.x
+package = "Cashbox"
+configure = admin/config/cashbox.master
+dependencies[] = cashbox
+#dependencies[] = trigger
+
+files[] = cashbox.admin.inc
+scripts[] = cb_callback.js

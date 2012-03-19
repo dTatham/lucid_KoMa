@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the cashbox module.
+ */
+function cashbox_schema() {
+	$schema['cashbox'] = array(
+		'description' => 'Stores user balance items',
+		'fields' => array(
+			'tid' => array('description' => 'Transaction-ID', 'type' => 'serial', 'not null' => TRUE),
+			'credited' 	=> array('description' => 'The username of the user being credited', 'type' => 'varchar', 'length' => 60, 'not null' => FALSE),
+			'debited'  	=> array('description' => 'The username of the user being debited',	'type' => 'varchar', 'length' => 60, 'not null' => FALSE),
+			'initiated' 	=> array('description' => 'The username of the user who created this transaction (if not credited/debited himself)', 'type' => 'varchar', 'length' => 60, 'not null' => FALSE),
+			'timestamp' 	=> array('description' => 'The timestamp this item was created', 'type' => 'int', 'not null' => FALSE),
+			'message' 	=> array('description' => 'Log message related to this item.', 'type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+			'amount'	=> array('description' => 'The amount credited or debited with this transaction.', 'type' => 'numeric', 'not null' => FALSE, 'precision' => 11, 'scale' => 2),
+			'balance_creditee'	=> array('description' => 'Current balance of the creditee after transaction', 'type'  => 'numeric', 'not null' => FALSE, 'precision' => 11, 'scale' => 2),
+			'balance_debitee' 	=> array('description' => 'Current balance of the debitee after transaction', 'type'  => 'numeric', 'not null' => FALSE, 'precision' => 11, 'scale' => 2),
+			'token'		=> array('description' => 'Security Hash to validate authenticity', 'type' => 'varchar', 'length' => 32, 'not null' => TRUE),
+			),
+		'primary key'	=> array('tid'),
+		'indexes'	=> array(
+			'idx_deb' => array('debited'),
+			'idx_cre' => array('credited'),
+			'idx_ini' => array('initiated'),
+			'idx_tim' => array('timestamp'),
+			),
+	);
+	return $schema;
+}
+

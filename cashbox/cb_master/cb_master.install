@@ -1,0 +1,46 @@
+<?php
+
+function cb_master_schema() {
+	$schema['cashbox_masters'] = array(
+	  'description' => 'Cashbox Master Accounts (not associated w/ user-account)',
+	  'fields' => array(
+	    'cbm_id' => array(
+	      'description' => 'TODO: beschreibe dieses Feld!',
+	      'type' => 'serial',
+	      'not null' => TRUE,
+	    ),
+	    'account_name' => array(
+	      'description' => 'TODO: beschreibe dieses Feld!',
+	      'type' => 'varchar',
+	      'length' => '30',
+	      'not null' => TRUE,
+	    ),
+	    'account_group' => array(
+	      'description' => 'TODO: beschreibe dieses Feld!',
+	      'type' => 'varchar',
+	      'length' => '50',
+	      'not null' => TRUE,
+	    ),
+	    'current_balance' => array(
+	      'description' => 'TODO: beschreibe dieses Feld!',
+	      'type' => 'numeric',
+	      'not null' => FALSE,
+	      'precision' => '10',
+	      'scale' => '2',
+	    ),
+	    'description' => array(
+	      'description' => 'TODO: beschreibe dieses Feld!',
+	      'type' => 'varchar',
+	      'length' => '255',
+	      'not null' => TRUE,
+	    ),
+	  ),
+	  'primary key' => array('cbm_id'),
+	  'indexes' => array(
+	    'account_name' => array('account_name'),
+	  ),
+	);
+	
+return $schema;
+}
+
