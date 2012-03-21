@@ -221,7 +221,7 @@ function cashbox_transfer($form, &$form_state) {
 		return $form;
 	}
 
-	else {
+	else {		/** confirm-page **/
 		if (user_access('transfer cashbox other_balances')) {
 			$form['general']['fid'] = array(
 					'#type' => 'hidden',
@@ -342,12 +342,12 @@ function cashbox_transfer_submit($form, &$form_state) {
 		$from_user = (empty($form_state['values']['fid']) ? $user : _cashbox_fetch_data($form_state['values']['fid']));
 		$to_user = (empty($form_state['values']['uid']) ? $user : _cashbox_fetch_data($form_state['values']['uid']));
 		$timestamp = time();
-		$token = _cashbox_checksum($to_user->name, $from_user->name, ($from_user->uid != $user->uid && $to_user->uid != $user->uid ? $user->name : NULL), $timestamp, substr($form_state['values']['message'],0,255), $amount);
+		$token = _cashbox_checksum($to_user->name, $from_user->name, ($from_user->name != $user->name $user->name : NULL), $timestamp, substr($form_state['values']['message'],0,255), $amount);
 		db_insert('cashbox')
 			->fields(array(
 				'credited'		=> $to_user->name,
 				'debited'		=> $from_user->name,
-				'initiated'		=> ($from_user->uid != $user->uid && $to_user->uid != $user->uid ? $user->name: NULL),
+				'initiated'		=> ($from_user->name != $user->name  ? $user->name : NULL),
 				'timestamp' 	=> $timestamp,
 				'message'	=> substr($form_state['values']['message'], 0, 255),
 				'amount'	=> $amount,

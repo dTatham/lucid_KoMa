@@ -256,6 +256,8 @@ function _cashbox_format(&$transaction, $display_user, $balance = false, $token 
 	$credited = NULL;
 	$initiated = NULL;
 
+	error_log('duh: ' . print_r($display_user, true));
+
 	switch ($transaction->credited) {
 	case NULL:
 		$credited = NULL;
@@ -311,23 +313,32 @@ function _cashbox_format(&$transaction, $display_user, $balance = false, $token 
 	
 	$cell['transaction']['data']	= NULL;
 
-	if (!empty($credited) && ($display_user->uid == $credited->uid))
+	if (!empty($credited) && ($display_user->name == $credited->name))
 		$cell['transaction']['data'] .=  (isset($debited->name) || $transaction->debited != NULL) ? t('From') . ': ' . ($debited ? $debited->name : $transaction->debited) . '<br />' : '';
-	if (($display_user->uid == @$debited->uid || @$initiated->uid == $display_user->uid) && (@$initiated->uid != $display_user->uid))
+	if (($display_user->name == @$debited->name || @$initiated->name == $display_user->name) && (@$initiated->name != $display_user->name))
 		$cell['transaction']['data'] .=  (isset($credited->name) || $transaction->credited != NULL) ? t('To') . ': ' . ($credited ? $credited->name : $transaction->credited) . '<br />' : '';
 	if ($initiated != NULL)
 		$cell['transaction']['data'] .=  t('By') . ': ' . $initiated->name . '<br />';
 	if (!empty($transaction->message))
 	       $cell['transaction']['data'] .=	'<div class="cashbox_message">' . $transaction->message . '</div>';
 
-	$cell['amount']		= array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . ($display_user->uid == @$credited->uid ? '+' : '-') . number_format($transaction->amount, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . '</div>', 'class' => ($display_user->uid == @$credited->uid  ? 'cashbox_credit' : 'cashbox_debit'));
+
+	$cell['amount']		= array(
+		'data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . 
+			($display_user->name == $credited->name ? '+' : '-') . 
+			number_format($transaction->amount, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . 
+			'</div>', 
+		'class' => ($display_user->name == $credited->name ? 'cashbox_credit' : 'cashbox_debit'));
 		
-	if ($balance != false) {
-		if ($display_user->uid == $credited->uid)
-			$cell['balance']	= array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . number_format($transaction->balance_creditee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . '</div>', 'class' => ($transaction->balance_creditee < -variable_get('cashbox_hardlimit', 50) ? 'cashbox_debit' : ''));
-		else
-			$cell['balance']	= array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . number_format($transaction->balance_debitee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . '</div>', 'class' => ($transaction->balance_debitee < -variable_get('cashbox_hardlimit', 50) ? 'cashbox_debit' : ''));
-	}
+	if ($balance != false) 
+		$cell['balance']	= array(
+			'data' => '<div class="cashbox_symbol">' . 
+				variable_get('cashbox_symbol', '$') . 
+				'</div><div class="cashbox_amount">' . 
+				number_format(($display_user->name == $credited->name) ? $transaction->balance_creditee : $transaction->balance_debitee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . 
+				'</div>', 
+			'class' => ((($display_user->name == $credited->name) ? $transaction->balance_creditee : $transaction->balance_debitee) < -variable_get('cashbox_hardlimit', 50) ?'cashbox_debit' : ''));
+		
 
 	if ($token) { 		// Recalculate token and verify
 		if (_cashbox_checksum($transaction->credited,  $transaction->debited, $transaction->initiated, $transaction->timestamp,  $transaction->message, $transaction->amount) == $transaction->token) {
