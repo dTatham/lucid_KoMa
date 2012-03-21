@@ -1,0 +1,188 @@
+# $Id$
+#
+# German translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  cb_master.admin.inc: n/a
+#  cb_master.module: n/a
+#  cb_master.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-03-21 18:49+0100\n"
+"PO-Revision-Date: 2012-03-22 16:41+0100\n"
+"Last-Translator: Daniel Zauner [lucid_nix] <translate@lucidnix.pyxis.uberspace.de>\n"
+"Language-Team: German <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: cb_master.admin.inc:22
+msgid "edit"
+msgstr "Bearbeiten"
+
+#: cb_master.admin.inc:22
+msgid "delete"
+msgstr "löschen"
+
+#: cb_master.admin.inc:25
+msgid "Master Account"
+msgstr "Master Konto"
+
+#: cb_master.admin.inc:25
+msgid "Associated Group(s)"
+msgstr "Assoziierte Gruppe(n)"
+
+#: cb_master.admin.inc:25;114
+msgid "Description"
+msgstr "Beschreibung"
+
+#: cb_master.admin.inc:25
+msgid "Actions"
+msgstr "Aktionen"
+
+#: cb_master.admin.inc:28
+msgid "New account"
+msgstr "Neues Konto"
+
+#: cb_master.admin.inc:41
+msgid "Are you sure you want to delete this Master Account?"
+msgstr "Sind Sie sicher, dass Sie dieses Master-Konto löschen wollen?"
+
+#: cb_master.admin.inc:49
+msgid "Delete"
+msgstr "Löschen"
+
+#: cb_master.admin.inc:52;124
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: cb_master.admin.inc:61
+msgid "Master Account \"@account\" has a non-zero balance. Please clear the account first."
+msgstr "Das Master-Konto \"@account\" hat einen Kontostand ungleich 0. Bitte gleichen Sie das Konto zuerst aus."
+
+#: cb_master.admin.inc:66
+msgid "Master Account successfully delelted."
+msgstr "Das Master-Konto wurde gelöscht."
+
+#: cb_master.admin.inc:85
+msgid "Create new Master Account"
+msgstr "Neues Master-Konto erstellen"
+
+#: cb_master.admin.inc:89
+msgid "Name"
+msgstr "Name"
+
+#: cb_master.admin.inc:90
+msgid "Name of the new Master Account"
+msgstr "Name des neuen Master-Kontos"
+
+#: cb_master.admin.inc:97
+msgid "Account Master"
+msgstr "Konto-Verwalter"
+
+#: cb_master.admin.inc:98
+msgid "Select the user-role(s) associated with the account"
+msgstr "Wählen Sie die die Benutzer-Rollen, die mit diesem Konto verknüpft werden sollen"
+
+#: cb_master.admin.inc:115
+msgid "Description of the new Master Account"
+msgstr "Beschreibung des neuen Master-Kontos"
+
+#: cb_master.admin.inc:121
+msgid "Save"
+msgstr "Speichern"
+
+#: cb_master.admin.inc:137
+msgid "Master Account may not contain spaces"
+msgstr "Der Name des Master-Kontos darf keine Leerzeichen enthalten"
+
+#: cb_master.admin.inc:141
+msgid "Master-Account name is already taken"
+msgstr "Dieser Name wird bereits verwendet"
+
+#: cb_master.admin.inc:166
+msgid "Master Account sucessfully updated!"
+msgstr "Das Master-Konto wurde geändert!"
+
+#: cb_master.admin.inc:179
+msgid "Rebuilding Transaction-Checksums"
+msgstr "Regeneriere die Prüfsummen der Transaktionen"
+
+#: cb_master.admin.inc:180
+msgid "Rebuilding Transaction-Checksums @current / @total"
+msgstr "Regeneriere die Prüfsummen der Transaktionen @current / @total"
+
+#: cb_master.admin.inc:190
+msgid "New Master Account successfully created"
+msgstr "Neues Master-Konto erstellt"
+
+#: cb_master.module:9
+msgid "Add new Master"
+msgstr "Neues Master-Konto erstellen"
+
+#: cb_master.module:10
+msgid "Create a new Master Account"
+msgstr "Darf neues Master-Konto erstellen"
+
+#: cb_master.module:12
+msgid "Allow outgoing transfers"
+msgstr "Ausgehende Transaktionen erlauben"
+
+#: cb_master.module:13
+msgid "User may transfer currency from an assigned Master Account"
+msgstr "Der Benutzer darf Beträge vom zugeordneten Master-Konto überweisen"
+
+#: cb_master.module:90;99
+msgid "Account Journal"
+msgstr "Kassenbuch"
+
+#: cb_master.module:145
+msgid "Select Master Account"
+msgstr "Master-Konto auswählen"
+
+#: cb_master.module:206
+msgid "No transactions available"
+msgstr "Es liegen keine Transaktionen vor"
+
+#: cb_master.module:209
+msgid "Transactions for @master"
+msgstr "Transaktionen für @master"
+
+#: cb_master.module:52
+msgid "Cashbox Admin"
+msgstr "Cashbox Verwaltung"
+
+#: cb_master.module:53
+msgid "Configure Cashbox Masters"
+msgstr "Cashbox Masters konfigurieren"
+
+#: cb_master.module:60
+msgid "Create New Master Account"
+msgstr "Neues Master-Konto erstellen"
+
+#: cb_master.module:68
+msgid "Edit Master Account"
+msgstr "Master-Konto bearbeiten"
+
+#: cb_master.module:76
+msgid "Delete Master Account"
+msgstr "Master-Konto löschen"
+
+#: cb_master.module:84
+msgid "Callback for Master-Account names"
+msgstr "Callback für Master-Account Namen (Hilfsfunktion)"
+
+#: cb_master.info:0
+msgid "Cashbox Masters"
+msgstr ""
+
+#: cb_master.info:0
+msgid "Master Accounts (not associated with user-accounts)"
+msgstr "Master-Konten (mit einer Benutzer-Rolle assoziiert)"
+
+#: cb_master.info:0
+msgid "Cashbox"
+msgstr ""
