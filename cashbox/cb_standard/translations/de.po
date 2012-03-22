@@ -1,498 +1,347 @@
 # $Id$
 #
-# LANGUAGE translation of Drupal (general)
+# German translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  cashbox/cb_master/cb_master.admin.inc: n/a
-#  cashbox/cb_standard/cashbox.transfer.inc: n/a
-#  cashbox/cb_master/cb_master.module: n/a
-#  cashbox/cb_standard/cashbox.module: n/a
-#  cashbox/cb_master/cb_master.info: n/a
-#  cashbox/cb_standard/cashbox.info: n/a
-#  cashbox/cb_standard/cashbox.admin.inc: n/a
+#  cashbox.transfer.inc: n/a
+#  cashbox.module: n/a
+#  cashbox.info: n/a
+#  cashbox.admin.inc: n/a
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-03-21 19:36+0100\n"
-"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
-"Last-Translator: NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-03-21 18:49+0100\n"
+"PO-Revision-Date: 2012-03-22 16:41+0100\n"
+"Last-Translator: Daniel Zauner [lucid_nix] <translate@lucidnix.pyxis.uberspace.de>\n"
+"Language-Team: German <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
-#: cashbox/cb_master/cb_master.admin.inc:22
-msgid "edit"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:22
-msgid "delete"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:25
-msgid "Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:25
-msgid "Associated Group(s)"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:25;114
-msgid "Description"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:25
-msgid "Actions"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:28
-msgid "New account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:41
-msgid "Are you sure you want to delete this Master Account?"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:49
-msgid "Delete"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:52;124
-msgid "Cancel"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:61
-msgid "Master Account \"@account\" has a non-zero balance. Please clear the account first."
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:66
-msgid "Master Account successfully delelted."
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:85
-msgid "Create new Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:89
-msgid "Name"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:90
-msgid "Name of the new Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:97
-msgid "Account Master"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:98
-msgid "Select the user-role(s) associated with the account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:115
-msgid "Description of the new Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:121 cashbox/cb_standard/cashbox.transfer.inc:34;217
+#: cashbox.transfer.inc:34;217
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
-#: cashbox/cb_master/cb_master.admin.inc:137
-msgid "Master Account may not contain spaces"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:141
-msgid "Master-Account name is already taken"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:166
-msgid "Master Account sucessfully updated!"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:179
-msgid "Rebuilding Transaction-Checksums"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:180
-msgid "Rebuilding Transaction-Checksums @current / @total"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.admin.inc:190
-msgid "New Master Account successfully created"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:9
-msgid "Add new Master"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:10
-msgid "Create a new Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:12
-msgid "Allow outgoing transfers"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:13
-msgid "User may transfer currency from an assigned Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:90;99
-msgid "Account Journal"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:145
-msgid "Select Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:206 cashbox/cb_standard/cashbox.transfer.inc:73;269;388 cashbox/cb_standard/cashbox.module:181
+#: cashbox.transfer.inc:73;269;388
+#: cashbox.module:181
 msgid "No transactions available"
-msgstr ""
+msgstr "Es liegen keine Transaktionen vor"
 
-#: cashbox/cb_master/cb_master.module:209
-msgid "Transactions for @master"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:52 cashbox/cb_standard/cashbox.module:54
+#: cashbox.module:54
 msgid "Cashbox Admin"
-msgstr ""
+msgstr "Cashbox Verwaltung"
 
-#: cashbox/cb_master/cb_master.module:53
-msgid "Configure Cashbox Masters"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:60
-msgid "Create New Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:68
-msgid "Edit Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:76
-msgid "Delete Master Account"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.module:84
-msgid "Callback for Master-Account names"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.info:0
-msgid "Cashbox Masters"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.info:0
-msgid "Master Accounts (not associated with user-accounts)"
-msgstr ""
-
-#: cashbox/cb_master/cb_master.info:0 cashbox/cb_standard/cashbox.info:0;0
+#: cashbox.info:0;0
 msgid "Cashbox"
 msgstr ""
 
-#: cashbox/cb_standard/cashbox.admin.inc:9
+#: cashbox.admin.inc:9
 msgid "General settings"
-msgstr ""
+msgstr "Allgemeine Einstellungen"
 
-#: cashbox/cb_standard/cashbox.admin.inc:13
+#: cashbox.admin.inc:13
 msgid "Currency Symbol"
-msgstr ""
+msgstr "Währungs-Symbol"
 
-#: cashbox/cb_standard/cashbox.admin.inc:17
+#: cashbox.admin.inc:17
 msgid "Choose a currency symbol - real or fake, your choice"
-msgstr ""
+msgstr "Wählen Sie ein Währungs-Symbol"
 
-#: cashbox/cb_standard/cashbox.admin.inc:22
+#: cashbox.admin.inc:22
 msgid "Thousands separator"
-msgstr ""
+msgstr "Tausender-Trennzeichen"
 
-#: cashbox/cb_standard/cashbox.admin.inc:23
+#: cashbox.admin.inc:23
 msgid "Please enter the correct thousands separator for your country - NOTE: all future inputs will be parsed according to this"
-msgstr ""
+msgstr "Bitte geben Sie das korrekte Tausender-Trennzeichen für Ihr Land ein - ACHTUNG: alle zukünftigen Eingaben werden dementsprechend geparsed"
 
-#: cashbox/cb_standard/cashbox.admin.inc:27;37
+#: cashbox.admin.inc:27;37
 msgid "e.g. "
-msgstr ""
+msgstr "z.B."
 
-#: cashbox/cb_standard/cashbox.admin.inc:32
+#: cashbox.admin.inc:32
 msgid "Decimal separator"
-msgstr ""
+msgstr "Dezimal-Trennzeichen"
 
-#: cashbox/cb_standard/cashbox.admin.inc:33
+#: cashbox.admin.inc:33
 msgid "Please enter the correct decimal separator for your country - NOTE: all future inputs will be parsed according to this"
-msgstr ""
+msgstr "Bitte geben Sie das korrekte Dezimal-Trennzeichen für Ihr Land ein - ACHTUNG: alle zukünftigen Eingaben werden dementsprechend geparsed"
 
-#: cashbox/cb_standard/cashbox.admin.inc:43
+#: cashbox.admin.inc:43
 msgid "Number of entries per page"
-msgstr ""
+msgstr "Transaktionen pro Seite"
 
-#: cashbox/cb_standard/cashbox.admin.inc:44
+#: cashbox.admin.inc:44
 msgid "Displayed balances per page, 0 for all on one page"
-msgstr ""
+msgstr "Anzahl der angezeigten Transaktionen pro Seite. 0 bedeutet, alle Transaktionen werden auf einer Seite dargestellt."
 
-#: cashbox/cb_standard/cashbox.admin.inc:51
+#: cashbox.admin.inc:51
 msgid "Display checksums as QR-Codes"
-msgstr ""
+msgstr "Prüfsummen als QR-Code darstellen"
 
-#: cashbox/cb_standard/cashbox.admin.inc:56
+#: cashbox.admin.inc:56
 msgid "Account Settings"
-msgstr ""
+msgstr "Konto-Einstellungen"
 
-#: cashbox/cb_standard/cashbox.admin.inc:57
+#: cashbox.admin.inc:57
 msgid "Define limits for transactions and accounts"
-msgstr ""
+msgstr "Grenzen für Transaktionen und Konten definieren"
 
-#: cashbox/cb_standard/cashbox.admin.inc:61
+#: cashbox.admin.inc:61
 msgid "Maximum overdraw"
-msgstr ""
+msgstr "Maximaler Überziehungsbetrag"
 
-#: cashbox/cb_standard/cashbox.admin.inc:67
+#: cashbox.admin.inc:67
 msgid "Hard-limit for overdrawing any account (recommended)"
-msgstr ""
+msgstr "Maximaler Betrag, um den überzogen werden kann (empfohlen)"
 
-#: cashbox/cb_standard/cashbox.admin.inc:72
+#: cashbox.admin.inc:72
 msgid "Default transaction limit"
-msgstr ""
+msgstr "Standard Transaktionslimit"
 
-#: cashbox/cb_standard/cashbox.admin.inc:78
+#: cashbox.admin.inc:78
 msgid "Maximum amount that can be transferred in one transaction (overruled by \"Maximum overdraw\" / special privliges may be applied)"
-msgstr ""
+msgstr "Maximaler Betrag pro Transaktion (wird ggf. durch \"Maximaler Überziehungsbetrag\" außer Kraft gesetzt / kann für einzelne Benutzer-Rollen deaktiviert werden)"
 
-#: cashbox/cb_standard/cashbox.admin.inc:97
+#: cashbox.admin.inc:97
 msgid "Thousands separator and decimal separator must not be the same"
-msgstr ""
+msgstr "Tausender- und Dezimaltrennzeichen dürfen nicht gleich sein."
 
-#: cashbox/cb_standard/cashbox.admin.inc:99
+#: cashbox.admin.inc:99
 msgid "Decimal separator must not be numeric"
-msgstr ""
+msgstr "Dezimal-Trennzeichen darf nicht numerisch sein"
 
-#: cashbox/cb_standard/cashbox.admin.inc:101
+#: cashbox.admin.inc:101
 msgid "Thousands separator must not be numeric"
-msgstr ""
+msgstr "Tausender-Trennzeichen darf nicht numerisch sein"
 
-#: cashbox/cb_standard/cashbox.admin.inc:103
+#: cashbox.admin.inc:103
 msgid "Maximum overdraw has to be numeric"
-msgstr ""
+msgstr "Maximaler Überziehungsbetrag muss numerisch sein"
 
-#: cashbox/cb_standard/cashbox.admin.inc:105
+#: cashbox.admin.inc:105
 msgid "Transaction limit has to be numeric"
-msgstr ""
+msgstr "Transaktionslimit muss numerisch sein"
 
-#: cashbox/cb_standard/cashbox.admin.inc:107
+#: cashbox.admin.inc:107
 msgid "Invalid value for the maximum number of balances displayed per page"
-msgstr ""
+msgstr "Ungültiger Wert für die Anzahl der dargestellten Transaktionen pro Seite"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:13;42;72
+#: cashbox.transfer.inc:13;42;72
 msgid "User"
-msgstr ""
+msgstr "Benutzer"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:20;48;72;203;245;268 cashbox/cb_standard/cashbox.module:223
+#: cashbox.transfer.inc:20;48;72;203;245;268
+#: cashbox.module:223
 msgid "Amount"
-msgstr ""
+msgstr "Betrag"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:29;57;72;212;254;268
+#: cashbox.transfer.inc:29;57;72;212;254;268
 msgid "Comment"
-msgstr ""
+msgstr "Kommentar"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:72;268
+#: cashbox.transfer.inc:72;268
 msgid "!user new balance"
-msgstr ""
+msgstr "!user neuer Kontostand"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:76;272
+#: cashbox.transfer.inc:76;272
 msgid "Please double-check your data"
-msgstr ""
+msgstr "Bitte prüfen Sie Ihre Eingaben"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:82;278
+#: cashbox.transfer.inc:82;278
 msgid "Are you sure you want to proceed?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie fortfahren wollen?"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:94
+#: cashbox.transfer.inc:94
 msgid "User invalid."
-msgstr ""
+msgstr "Ungültiger Benutzer."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:98;310
+#: cashbox.transfer.inc:98;310
 msgid "Amount invalid."
-msgstr ""
+msgstr "Ungültiger Betrag."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:116;339
+#: cashbox.transfer.inc:116;339
 msgid "Transaction successful."
-msgstr ""
+msgstr "Transaktion erfolgreich."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:162
+#: cashbox.transfer.inc:162
 msgid "Transaction data"
-msgstr ""
+msgstr "Transaktions-Daten"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:171;228;268
+#: cashbox.transfer.inc:171;228;268
 msgid "Sender"
-msgstr ""
+msgstr "Sender"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:196;238;268
+#: cashbox.transfer.inc:196;238;268
 msgid "Beneficiary"
-msgstr ""
+msgstr "Empfänger"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:302
+#: cashbox.transfer.inc:302
 msgid "Sender :fid invalid."
-msgstr ""
+msgstr "Sender :fid ist ungültig."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:305
+#: cashbox.transfer.inc:305
 msgid "Benificiary invalid."
-msgstr ""
+msgstr "Empfänger ist ungültig."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:307
+#: cashbox.transfer.inc:307
 msgid "Nice try!"
-msgstr ""
+msgstr "Netter Versuch!"
 
-#: cashbox/cb_standard/cashbox.transfer.inc:313
+#: cashbox.transfer.inc:313
 msgid "!user may not exceeed the transaction limit of !symbol !number."
-msgstr ""
+msgstr "!user darf das Transaktions-Limit von !symbol !number nicht überschreiten."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:319
+#: cashbox.transfer.inc:319
 msgid "Amount exceeds !user limit."
-msgstr ""
+msgstr "Der Betrag überschreitet !user Limit."
 
-#: cashbox/cb_standard/cashbox.transfer.inc:391
+#: cashbox.transfer.inc:391
 msgid "The following transaction has been completed successfully."
-msgstr ""
+msgstr "Die folgende Transaktion wurde erfolgreich abgeschlossen:"
 
-#: cashbox/cb_standard/cashbox.module:9
+#: cashbox.module:9
 msgid "View own balance"
-msgstr ""
+msgstr "Eigenes Konto anzeigen"
 
-#: cashbox/cb_standard/cashbox.module:10
+#: cashbox.module:10
 msgid "Allow user to view own balance"
-msgstr ""
+msgstr "Erlaubt dem Benutzer sein eigenes Konto einzusehen"
 
-#: cashbox/cb_standard/cashbox.module:13
+#: cashbox.module:13
 msgid "View other users' transactions"
-msgstr ""
+msgstr "Transaktionen anderer Benutzer anzeigen"
 
-#: cashbox/cb_standard/cashbox.module:14
+#: cashbox.module:14
 msgid "Allow user to view other users' balances and transactions"
-msgstr ""
+msgstr "Kann Transaktionen anderer Benutzer einsehen"
 
-#: cashbox/cb_standard/cashbox.module:18
+#: cashbox.module:18
 msgid "View all transactions"
-msgstr ""
+msgstr "Alle Transaktionen anzeigen"
 
-#: cashbox/cb_standard/cashbox.module:19
+#: cashbox.module:19
 msgid "Allow user to view all balances (i.e. master overview)"
-msgstr ""
+msgstr "Benutzer kann alle Transaktionen einsehen (Generalübersicht)"
 
-#: cashbox/cb_standard/cashbox.module:23
+#: cashbox.module:23
 msgid "Transfer own funds"
-msgstr ""
+msgstr "Überweisung vom eigenen Konto"
 
-#: cashbox/cb_standard/cashbox.module:24
+#: cashbox.module:24
 msgid "User may transfer own funds"
-msgstr ""
+msgstr "Benutzer kann sein eigenes Guthaben transferrieren"
 
-#: cashbox/cb_standard/cashbox.module:27
+#: cashbox.module:27
 msgid "Allow user to transfer other users' funds"
-msgstr ""
+msgstr "Erlaube Überweisungen von fremden Konten"
 
-#: cashbox/cb_standard/cashbox.module:31
+#: cashbox.module:31
 msgid "Allow overdraw"
-msgstr ""
+msgstr "Darf überziehen"
 
-#: cashbox/cb_standard/cashbox.module:32
+#: cashbox.module:32
 msgid "Allow user to overdraw the account"
-msgstr ""
+msgstr "Der Benutzer darf sein Konto über das gesetzte Limit überziehen"
 
-#: cashbox/cb_standard/cashbox.module:35
+#: cashbox.module:35
 msgid "Exceed transaction limit"
-msgstr ""
+msgstr "Transaktions-Limit deaktiveren"
 
-#: cashbox/cb_standard/cashbox.module:36
+#: cashbox.module:36
 msgid "Allow user to over the default transaction limit"
-msgstr ""
+msgstr "Das Transaktionslimit gilt nicht für den Benutzer"
 
-#: cashbox/cb_standard/cashbox.module:39
+#: cashbox.module:39
 msgid "Adjust own account"
-msgstr ""
+msgstr "Manipuliere Konten"
 
-#: cashbox/cb_standard/cashbox.module:40
+#: cashbox.module:40
 msgid "Allow user adjustment of own account"
-msgstr ""
+msgstr "Der Benutzer kann Konten manipulieren (Guthaben ohne Ausgleichsbuchung hinzufügen / abziehen)"
 
-#: cashbox/cb_standard/cashbox.module:184
-msgid "Some balance records are inconsistent. Please contact your administrator."
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:217
-msgid "Timestamp"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:220
-msgid "Account"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:222
-msgid "Transaction"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:226
-msgid "New balance"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:228
-msgid "Checksum"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:317
-msgid "From"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:319
-msgid "To"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:321
-msgid "By"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:351
-msgid "CHECKSUM MISMATCH"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:428
-msgid "This is @user balance sheet"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:55
-msgid "Configure Cashbox"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:63
-msgid "Account statement AJAX Callback"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:71
-msgid "AJAX Autocomplete Callback for transfers"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:77;86
+#: cashbox.module:77;86
 msgid "Transfer funds"
-msgstr ""
+msgstr "Überweisungen"
 
-#: cashbox/cb_standard/cashbox.module:94
-msgid "Transaction Confirmation"
-msgstr ""
-
-#: cashbox/cb_standard/cashbox.module:101
+#: cashbox.module:101
 msgid "Adjust account"
-msgstr ""
+msgstr "Konto anpassen"
 
-#: cashbox/cb_standard/cashbox.module:109
+#: cashbox.module:184
+msgid "Some balance records are inconsistent. Please contact your administrator."
+msgstr "Eine Transaktionsdaten sind inkonsistent. Bitte kontaktieren Sie den Administrator!"
+
+#: cashbox.module:217
+msgid "Timestamp"
+msgstr "Zeitstempel"
+
+#: cashbox.module:220
+msgid "Account"
+msgstr "Benutzerkonto"
+
+#: cashbox.module:222
+msgid "Transaction"
+msgstr "Transaktion"
+
+#: cashbox.module:226
+msgid "New balance"
+msgstr "Neuer Kontostand"
+
+#: cashbox.module:228
+msgid "Checksum"
+msgstr "Prüfsumme"
+
+#: cashbox.module:317
+msgid "From"
+msgstr "Von"
+
+#: cashbox.module:319
+msgid "To"
+msgstr "An"
+
+#: cashbox.module:321
+msgid "By"
+msgstr "Durch"
+
+#: cashbox.module:351
+msgid "CHECKSUM MISMATCH"
+msgstr "PRÜFSUMME STIMMT NICHT! (Das ist sehr sehr schlecht!!!)"
+
+#: cashbox.module:428
+msgid "This is @user balance sheet"
+msgstr "Dies ist @user Kontoauszug"
+
+#: cashbox.module:55
+msgid "Configure Cashbox"
+msgstr "Cashbox konfigurieren"
+
+#: cashbox.module:63
+msgid "Account statement AJAX Callback"
+msgstr "AJAX-Callback für die Darstellung der Kontoauszüge"
+
+#: cashbox.module:71
+msgid "AJAX Autocomplete Callback for transfers"
+msgstr "Auto-Vervollständigung Callback für Überweisungen"
+
+#: cashbox.module:94
+msgid "Transaction Confirmation"
+msgstr "Transaktionsbestätigung"
+
+#: cashbox.module:109
 msgid "Account Statement"
-msgstr ""
+msgstr "Kontoauszug"
 
-#: cashbox/cb_standard/cashbox.module:110
+#: cashbox.module:110
 msgid "Account statements"
-msgstr ""
+msgstr "Kontoauszüge"
 
-#: cashbox/cb_standard/cashbox.info:0
+#: cashbox.info:0
 msgid "Simple accounting / bookkeeping module for small communities"
-msgstr ""
+msgstr "Buchführungsmodul für kleine Communities"
 
+#: cashbox.module:428
+msgid "your"
+msgstr ""
