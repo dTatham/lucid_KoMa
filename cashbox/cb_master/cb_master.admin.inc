@@ -173,8 +173,6 @@ function cb_master_dispatch_submit($form, &$form_state) {
 			$batch_op = array();
 			while ($foo = $results->fetchAssoc()) 
 				$batch_op[] =  array('_cashbox_rebuild_checksum', array($foo['tid']));
-	//		drupal_set_message('TODO!!! FIX CHECKSUMS AFTER UPDATE! // Total affected: ' . sizeof($chksums), 'warning');
-	//		_cashbox_rebuild_checksum($chksums[0]);
 			batch_set(array(
 				'title' => t('Rebuilding Transaction-Checksums'),
 				'progress_message' => t('Rebuilding Transaction-Checksums @current / @total'),

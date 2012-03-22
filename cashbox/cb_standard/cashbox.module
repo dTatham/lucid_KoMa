@@ -444,3 +444,39 @@ function _cashbox_get_current_balance($user) {
 
 }
 
+/**
+  * user-alter:
+  * Regenerate checksums after a username has been changed
+  * (implements hook_user_update)
+  */
+function cashbox_user_update(&$edit, $account, $category) {
+	/** We're only interested in user-name changes, so pass up on everything else **/
+	if ($category != 'account' || strcmp($edit['name'], $edit['original']->name) == 0)
+		return;
+
+	$affected = db_update('cashbox')->fields(array('credited' => $edit['name']))->condition('credited', $edit['original']->name)->execute();
+	$affected += db_update('cashbox')->fields(array('debited' => $edit['name']))->condition('debited', $edit['original']->name)->execute();
+
+	/** If the user made no transactions so far: screw it! **/
+	if ($affected == 0)
+		return;
+
+	$results = db_select('cashbox', 'c')->fields('c', array('tid'))->condition(db_or()->condition('credited', $edit['name'])->condition('debited', $edit['name']))->execute();
+	$batch_op = array();
+
+	/** Fill up the batch_op array for rebuilding the checksums **/
+	while ($foo = $results->fetchAssoc())
+		$batch_op[] =  array('_cashbox_rebuild_checksum', array($foo['tid']));
+
+	 batch_set(array(
+		 'title' => t('Rebuilding Transaction-Checksums'),
+		 'progress_message' => t('Rebuilding Transaction-Checksums @current / @total'),
+		 'operations' => $batch_op,
+		 ));
+
+	error_log('user_update event occured! - ' . $affected . ' accounts updated!');
+
+
+/*	error_log('edit: ' . print_r($edit, true));
+error_log('category: ' . print_r($category)); */
+}
