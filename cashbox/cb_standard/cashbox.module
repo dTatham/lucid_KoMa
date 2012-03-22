@@ -256,8 +256,6 @@ function _cashbox_format(&$transaction, $display_user, $balance = false, $token 
 	$credited = NULL;
 	$initiated = NULL;
 
-	error_log('duh: ' . print_r($display_user, true));
-
 	switch ($transaction->credited) {
 	case NULL:
 		$credited = NULL;
@@ -416,8 +414,6 @@ function _cashbox_fetch($username, $limit, $header = false) {
 function cashbox_user_display($argbox) {
 	global $user;
 
-	error_log("foo!!!");
-
 	drupal_add_js(drupal_get_path('module', 'cashbox') . '/jquery.url.js', array('weight' => 4));
         drupal_add_js(drupal_get_path('module', 'cashbox') . '/cashbox.callback.js', array('weight' => 5));
 	drupal_add_js('initializeTable(' . $argbox->uid . ');', array('type' => 'inline', 'weight' => 6));
@@ -425,7 +421,7 @@ function cashbox_user_display($argbox) {
 	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox.css');
 
 	$page_array['cashbox_arguments'] = array(
-		'#markup' => t('This is @user balance sheet', array('@user' => ($argbox->uid == $user->uid ? 'your' : $argbox->name . '\'s'))) . '<div id="table-container"></div>',
+		'#markup' => t('This is @user balance sheet', array('@user' => ($argbox->uid == $user->uid ? t('your') : $argbox->name . '\'s'))) . '<div id="table-container"></div>',
 	);
  	return $page_array;
 }
@@ -457,7 +453,7 @@ function cashbox_user_update(&$edit, $account, $category) {
 	$affected = db_update('cashbox')->fields(array('credited' => $edit['name']))->condition('credited', $edit['original']->name)->execute();
 	$affected += db_update('cashbox')->fields(array('debited' => $edit['name']))->condition('debited', $edit['original']->name)->execute();
 
-	/** If the user made no transactions so far: screw it! **/
+	/** If the user made no transactions so far: screw it! */
 	if ($affected == 0)
 		return;
 
