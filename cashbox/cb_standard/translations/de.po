@@ -344,4 +344,4 @@ msgstr "Buchführungsmodul für kleine Communities"
 
 #: cashbox.module:428
 msgid "your"
-msgstr ""
+msgstr "Ihr"
