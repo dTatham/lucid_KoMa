@@ -4,15 +4,17 @@
  * @file
  * Install and uninstall functions for the cashbox module.
  */
+
 function cashbox_schema() {
 	$schema['cashbox'] = array(
 		'description' => 'Stores user balance items',
 		'fields' => array(
 			'tid' => array('description' => 'Transaction-ID', 'type' => 'serial', 'not null' => TRUE),
+			'timestamp' 	=> array('description' => 'The timestamp this item was created', 'type' => 'int', 'not null' => FALSE),
+			'tag' 		=> array('description' => 'The Taxonomy-Tag used to classify this transaction', 'type' => 'int', 'not null' => FALSE),
 			'credited' 	=> array('description' => 'The username of the user being credited', 'type' => 'varchar', 'length' => 60, 'not null' => FALSE),
 			'debited'  	=> array('description' => 'The username of the user being debited',	'type' => 'varchar', 'length' => 60, 'not null' => FALSE),
 			'initiated' 	=> array('description' => 'The username of the user who created this transaction (if not credited/debited himself)', 'type' => 'varchar', 'length' => 60, 'not null' => FALSE),
-			'timestamp' 	=> array('description' => 'The timestamp this item was created', 'type' => 'int', 'not null' => FALSE),
 			'message' 	=> array('description' => 'Log message related to this item.', 'type' => 'varchar', 'length' => 255, 'not null' => FALSE),
 			'amount'	=> array('description' => 'The amount credited or debited with this transaction.', 'type' => 'numeric', 'not null' => FALSE, 'precision' => 11, 'scale' => 2),
 			'balance_creditee'	=> array('description' => 'Current balance of the creditee after transaction', 'type'  => 'numeric', 'not null' => FALSE, 'precision' => 11, 'scale' => 2),
@@ -23,10 +25,53 @@ function cashbox_schema() {
 		'indexes'	=> array(
 			'idx_deb' => array('debited'),
 			'idx_cre' => array('credited'),
+			'idx_tag' => array('tag'),
 			'idx_ini' => array('initiated'),
 			'idx_tim' => array('timestamp'),
 			),
 	);
 	return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function cashbox_install() {
+  // Set the weight of the forum.module to 1 so it is loaded after the taxonomy.module.
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'cashbox')
+    ->execute();
+}
+
+/**
+ * Implements hook_enable().
+ */
+function cashbox_enable() {
+  // Create the cashbox vocabulary if it does not exist.
+  $vocabulary = taxonomy_vocabulary_load(variable_get('cashbox_transaction_taxonomy', 0));
+  if (!$vocabulary) {
+    $edit = array(
+      'name' => t('Transaction-Types'),
+      'machine_name' => 'cb_transactions',
+      'description' => t('Transaction-Type Vocabulary'),
+      'hierarchy' => 1,
+      'module' => 'cashbox',
+      'weight' => -10,
+    );
+    $vocabulary = (object) $edit;
+    taxonomy_vocabulary_save($vocabulary);
+    variable_set('cashbox_transaction_taxonomy', $vocabulary->vid);
+  }
+
+    // Create a default transaction-type so cashbox-transactions can be created.
+    $edit = array(
+      'name' => t('CT',array(),array('context' => 'Identification Code for standard Credit Transfer')),
+      'description' => t('Regular Transfer'),
+      'parent' => array(0),
+      'vid' => $vocabulary->vid,
+    );
+    $term = (object) $edit;
+    taxonomy_term_save($term);
 }
 

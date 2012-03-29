@@ -25,10 +25,18 @@ function cashbox_adjust($form, &$form_state) {
 			'#default_value' => '0' . variable_get('cashbox_decimal', '.') . '00',
 			'#required'	=> true,
 		);
+		$form['tag'] = array(
+			'#title' => t('Transaction Type'),
+			'#type' => 'select',
+			'#options' => _cashbox_get_transaction_terms(),
+			'#default_value' => variable_get('cashbox_taxonomy_default'),
+			'#required'	=> true,
+		);
 		$form['message'] = array(
 			'#title' => t('Comment'),
 			'#type' => 'textfield',
 			'#maxlength' => 255,
+			'#required' => true,
 		);
 		$form['submit'] = array(
 			'#value' => t('Save'),
@@ -53,6 +61,11 @@ function cashbox_adjust($form, &$form_state) {
 			'#default_value' => '0' . variable_get('cashbox_decimal', '.') . '00',
 			'#required'	=> true,
 		);
+		$form['tag'] = array(
+			'#title' => t('Transaction Type'),
+			'#type' => 'hidden',
+			'#required' => true,
+		);
 		$form['message'] = array(
 			'#title' => t('Comment'),
 			'#type' => 'hidden',
@@ -64,12 +77,13 @@ function cashbox_adjust($form, &$form_state) {
 
 		$row = array(array(
 			$form_state['values']['user'],
+			taxonomy_term_load($form_state['values']['tag'])->name,
 			$form_state['values']['message'],
 			array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . number_format($form_state['values']['amount'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand')) . '</div>', 'class' => 'cashbox_amount ' . ($form_state['values']['amount'] < 0 ? 'cashbox_debit' : 'cashbox_credit')),
 			array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . number_format($form_state['values']['balance'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand')) . '</div>', 'class' => 'cashbox_amount ' . ($form_state['values']['balance'] < 0 ? 'cashbox_debit' : 'cashbox_credit')),
 		));
 		$html = theme('table',  array(
-			'header'        => array(t('User'), t('Comment'), t('Amount'), t('!user new balance', array('!user' => ($user->name == (isset($form_state['values']['user']) ? $form_state['values']['user'] : $user->name) ? 'Your' : $form_state['values']['user'].'\'s')))),
+			'header'        => array(t('User'), t('Type'), t('Comment'), t('Amount'), t('!user new balance', array('!user' => ($user->name == (isset($form_state['values']['user']) ? $form_state['values']['user'] : $user->name) ? t('Your') : $form_state['values']['user'].'\'s')))),
 			'empty'         => t('No transactions available'),
 			'rows'          => $row,
 			'sticky'        => true,
@@ -94,6 +108,8 @@ function cashbox_adjust_validate($form, &$form_state) {
 		form_set_error('user', t('User invalid.'));
 		return;
 	}
+	if (!taxonomy_term_load($form_state['values']['tag']))
+		form_set_error('tag', t('Transaction Type invalid'));
 	if (!is_numeric($amount))
 		form_set_error('amount', t('Amount invalid.'));
 	else {
@@ -124,8 +140,9 @@ function cashbox_adjust_submit($form, &$form_state) {
 			->fields(array(
 				'credited'		=> isset($credited->name) ? $credited->name : NULL,
 				'debited'		=> isset($debited->name) ? $debited->name : NULL,
+				'tag'			=> $form_state['values']['tag'],
+				'timestamp' 		=> $timestamp,
 				'initiated'		=> $user->name,
-				'timestamp' 	=> $timestamp,
 				'message'	=> substr($form_state['values']['message'], 0, 255),
 				'amount'	=> number_format(abs($amount), 2),
 				'balance_creditee'	=> ($amount > 0 ? _cashbox_get_current_balance($credited->name)+$amount : 0),
@@ -208,10 +225,25 @@ function cashbox_transfer($form, &$form_state) {
 			'#default_value' => '0' . variable_get('cashbox_decimal', '.') . '00',
 			'#required'	=> true,
 		);
+		if (user_access('transfer cashbox other_balances') || user_access('cb_master transfer_from')) 
+			$form['general']['tag'] = array(
+				'#title' => t('Transaction Type'),
+				'#type' => 'select',
+				'#options' => _cashbox_get_transaction_terms(),
+				'#default_value' => variable_get('cashbox_taxonomy_default'),
+				'#required'     => true,
+			);
+		else
+			$form['general']['tag'] = array(
+				'#type'	=> 'hidden',
+				'#default_value' => variable_get('cashbox_taxonomy_default'),
+			);
+
 		$form['general']['message'] = array(
 			'#title' => t('Comment'),
 			'#type' => 'textfield',
 			'#maxlength' => 255,
+			'#required' => true,
 		);
 		$form['general']['submit'] = array(
 			'#value' => t('Save'),
@@ -250,6 +282,11 @@ function cashbox_transfer($form, &$form_state) {
 			'#default_value' => '0' . variable_get('cashbox_decimal', '.') . '00',
 			'#required'	=> true,
 		);
+		$form['general']['tag'] = array(
+			'#type' => 'hidden',
+			'#required' => true,
+			'#default_value' => variable_get('cashbox_taxonomy_default'),
+		);
 		$form['general']['message'] = array(
 			'#title' => t('Comment'),
 			'#type' => 'hidden',
@@ -260,12 +297,13 @@ function cashbox_transfer($form, &$form_state) {
 		$row = array(array(
 			(isset($form_state['values']['fid']) ? $form_state['values']['fid'] : $user->name),
 			$form_state['values']['uid'],
+			taxonomy_term_load($form_state['values']['tag'])->name,
 			$form_state['values']['message'],
 			array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . number_format($form_state['values']['amount'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand')) . '</div>', 'class' => 'cashbox_amount ' . ($form_state['values']['amount'] < 0 ? 'casbox_debit' : 'cashbox_credit')),
 			array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . number_format($form_state['values']['balance'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand')) . '</div>', 'class' => 'cashbox_amount ' . ($form_state['values']['balance'] < 0 ? 'cashbox_debit' : 'cashbox_credit')),
 		));
 		$html = theme('table',  array(
-			'header'        => array(t('Sender'), t('Beneficiary'), t('Comment'), t('Amount'), t('!user new balance', array('!user' => ($user->name == (isset($form_state['values']['fid']) ? $form_state['values']['fid'] : $user->name) ? 'Your' : $form_state['values']['fid'].'\'s')))),
+			'header'        => array(t('Sender'), t('Beneficiary'), t('Type'), t('Comment'), t('Amount'), t('!user new balance', array('!user' => ($user->name == (isset($form_state['values']['fid']) ? $form_state['values']['fid'] : $user->name) ? t('Your') : $form_state['values']['fid'].'\'s')))),
 			'empty'         => t('No transactions available'),
 			'rows'          => $row,
 			'sticky'        => true,
@@ -305,6 +343,9 @@ function cashbox_transfer_validate($form, &$form_state) {
 		form_set_error('uid', t('Benificiary invalid.'));
 	else if  ($from_user == $to_user)
 		form_set_error('uid',  t('Nice try!'));
+
+	if (!taxonomy_term_load($form_state['values']['tag']))
+		form_set_error('tag', t('Transaction Type invalid'));
 
 	if (!is_numeric($amount) || $amount <= 0)
 		form_set_error('amount', t('Amount invalid.'));
@@ -347,6 +388,7 @@ function cashbox_transfer_submit($form, &$form_state) {
 			->fields(array(
 				'credited'		=> $to_user->name,
 				'debited'		=> $from_user->name,
+				'tag'			=> $form_state['values']['tag'],
 				'initiated'		=> ($from_user->name != $user->name  ? $user->name : NULL),
 				'timestamp' 	=> $timestamp,
 				'message'	=> substr($form_state['values']['message'], 0, 255),
@@ -382,11 +424,11 @@ function _cashbox_transfer_confirm($d_user, $token) {
 	if (!$transaction || ($d_user->uid != $user->uid && !user_access('transfer cashbox other_balances')))
 		die(drupal_not_found());
 
-
+	$header = new cbHeader();
 	$html = theme('table',  array(
-		'header'        => _cashbox_get_header(true, false, true),
+		'header'        => $header->getHeader(),
 		'empty'         => t('No transactions available'),
-		'rows'          => array(_cashbox_format($transaction, $d_user, false, true, true)),
+		'rows'          => array(_cashbox_format_transaction($transaction, $header, $d_user)),
 		'sticky'        => true,
 		'caption'       => t('The following transaction has been completed successfully.'),
 	));

@@ -1,5 +1,7 @@
 <?php
 
+define('CASHBOX_WILDCARD_ALL', '  all  ');
+define('CASHBOX_WILDCARD_OVERVIEW', '  overview  ');
 /**
  * Implements hook_permission().
  */
@@ -59,7 +61,7 @@ function cashbox_menu() {
 		'type' => MENU_NORMAL_ITEM,
 		'file' => 'cashbox.admin.inc',
 	);
-	$items['cashbox/callback/%user_uid_optional'] = array(
+ 	$items['cashbox/callback/%user_uid_optional'] = array(
 		'title'		=> 'Account statement AJAX Callback',
 		'page callback'	=> '_cashbox_user_display_callback',
 		'page arguments' => array(2),
@@ -73,22 +75,54 @@ function cashbox_menu() {
 		'access arguments' => array('access user profiles'),
 		'type'		=> MENU_CALLBACK,
 	);
-	$items['cashbox/transfer'] = array(
-		'title'		=> t('Transfer funds'),
-		'page callback'	=> 'drupal_get_form',
-		'page arguments' => array('cashbox_transfer'),
-		'access arguments' => array('transfer cashbox own_balance'),
-		'file'		=> 'cashbox.transfer.inc',
-		'type'	=> MENU_NORMAL_ITEM,
-		'menu_name'	=> 'user-menu',
+	$items['cashbox/callback/books/%'] = array(
+		'title'		=> 'AJAX Callback for Account-Journals',
+		'page callback' => '_cashbox_books_callback',
+		'page arguments' => array(3),
+		'access arguments' => array('view cashbox other_balances'),
+		'type'		=> MENU_CALLBACK,
 	);
-	$items['cashbox/transfer/normal'] = array(
-		'title'		=> t('Transfer funds'),
+	$items['cashbox'] = array(
+		'title' => 'Cashbox',
+		'page callback' => 'cashbox_user_display',
+		'page arguments' => array(false),
+		'access arguments' => array('view cashbox own_balance'),
+		'menu_name' => 'user-menu',
+		'type' => MENU_NORMAL_ITEM,
+	);
+	$items['cashbox/my_balance'] = array(
+		'title' => 'Account Statement',
+		'page callback' => 'cashbox_user_display',
+		'page arguments' => array(false),
+		'access arguments' => array('view cashbox own_balance'),
+		'type' => MENU_DEFAULT_LOCAL_TASK | MENU_NORMAL_ITEM,
+		'parent' => 'cashbox',
+		'weight' => -10,
+	);
+	$items['cashbox/accounts'] = array(
+		'title'		=> 'Account Journal',
+		'description'	=> 'Display other accounts',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cashbox_display_all'),
+		'access arguments' => array('view cashbox other_balances'),
+		'weight'	=> 10,
+		'type'		=> MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+	);
+	$items['cashbox/display/%user'] = array(
+		'title' => 'Account Statement',
+		'page callback' => 'cashbox_user_display',
+		'page arguments' => array(2),
+		'access callback' => '_cashbox_check_access',
+		'access arguments' => array(2,1), // permission
+		'type' => MENU_CALLBACK,
+	);
+ 	$items['cashbox/transfer'] = array(
+		'title'		=> 'Transfer funds',
 		'page callback'	=> 'drupal_get_form',
 		'page arguments' => array('cashbox_transfer'),
 		'access arguments' => array('transfer cashbox own_balance'),
 		'file'		=> 'cashbox.transfer.inc',
-		'type'	=> MENU_DEFAULT_LOCAL_TASK,
+		'type'	=> MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
 	);
 	$items['cashbox/confirm/%/%'] = array(
 		'title'		=> 'Transaction Confirmation',
@@ -96,26 +130,38 @@ function cashbox_menu() {
 		'page arguments' => array(2, 3),
 		'access arguments' => array('transfer cashbox own_balance'),
 		'file'		=> 'cashbox.transfer.inc',
+		'type'		=> MENU_CALLBACK,
 	);
-	$items['cashbox/transfer/adjust'] = array(
-		'title'		=> t('Adjust account'),
+	$items['cashbox/adjust'] = array(
+		'title'		=> 'Adjust account',
 		'page callback'	=> 'drupal_get_form',
 		'page arguments' => array('cashbox_adjust'),
 		'access arguments' => array('adjust cashbox'),
 		'file'		=> 'cashbox.transfer.inc',
-		'type'	=> MENU_LOCAL_TASK,
+		'type'	=> MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
 	);
-	$items['user/%user/cashbox'] = array(
-		'title' => 'Account Statement',
-		'description' => 'Account statements',
-		'page callback' => 'cashbox_user_display',
-		'page arguments' => array(1), // arguments for the callback function 'profile_use_page'
-		'access callback' => '_cashbox_check_access',
-		'access arguments' => array(1,2), // permission
-		'type' => MENU_LOCAL_TASK,
-		);
+ 
+	return $items;
+}
 
- return $items;
+function cuser_to_arg($cuser) {
+	var_dump($cuser);
+#	return user_load($cuser)->uid;
+}
+ 
+function _cashbox_get_transaction_terms() {
+	$tree = taxonomy_get_tree(variable_get('cashbox_transaction_taxonomy'));
+
+	if (empty($tree))
+		return array();
+
+	$terms = array();
+	foreach ($tree as $term)
+		$terms[$term->tid] = $term->name . ' (' . $term->description . ')';
+
+	return $terms;
+
+
 }
 
 /**
@@ -144,6 +190,115 @@ function _cashbox_autocomplete_callback($string = '') {
 	drupal_json_output($matches);
 }
 
+class cbHeader {
+	public $tid;
+	public $timestamp;
+	public $credited;
+	public $debited;
+	public $tag;
+	public $amount;
+	public $balance_creditee;
+	public $balance_debitee;
+	public $balance_user;
+	public $text;
+	public $checksum;
+
+	public function __construct($tid = true, 
+			$timestamp = true, 
+			$credited = false, 
+			$debited = false, 
+			$tag = true, 
+			$amount = true, 
+			$text = true, 
+			$balance_creditee = false, 
+			$balance_debitee = false, 
+			$balance_user = true, 
+			$checksum = true) 
+	{
+		$this->tid 		= $tid;
+		$this->timestamp 	= $timestamp;
+		$this->credited 	= $credited;
+		$this->debited 		= $debited;
+		$this->tag		= $tag;
+		$this->amount		= $amount;
+		$this->balance_creditee	= $balance_creditee;
+		$this->balance_debitee	= $balance_debitee;
+		$this->balance_user	= $balance_user;
+		$this->text		= $text;
+		$this->checksum		= $checksum;
+	}
+
+	public function getHeader() {
+		$header = array();
+		if ($this->tid)		$header['tid'] 		= array('data' => '#', 'field' => 'tid', 'sort' => 'asc');
+		if ($this->timestamp)	$header['timestamp']	= array('data' => t('Timestamp'), 'field' => 'timestamp', 'sort' => 'desc');
+		if ($this->tag)		$header['tag']		= array('data' => t('Type'), 'field' => 'tag', 'sort' => 'asc');
+		if ($this->debited)	$header['debited']	= array('data' => t('Debitor'));
+		if ($this->credited)	$header['credited']	= array('data' => t('Creditor'));
+		if ($this->text)	$header['text']		= array('data' => t('Text'));
+		if ($this->amount)	$header['amount']	= array('data' => t('Amount'));
+		if ($this->balance_debitee)  $header['balance_debited']  = array('data' => t('Balance<br />Debitor'));
+		if ($this->balance_creditee) $header['balance_credited'] = array('data' => t('Balance<br />Creditor'));
+		if ($this->balance_user) $header['balance']	= array('data' => t('New Balance'));
+		if ($this->checksum)	$header['checksum']	= array('data' => t('Checksum'));
+
+		return $header;
+	}
+}
+
+function _cashbox_format_transaction(&$transaction, &$header, &$user = false) {
+	$cell = array();
+	if ($header->tid)		$cell['tid'] 		= $transaction->tid;
+	if ($header->timestamp)		$cell['timestamp'] 	= array('data' => format_date($transaction->timestamp, 'short'), 'class' => 'cashbox_date');
+	if ($header->tag)		$cell['tag'] 		= array('data' => taxonomy_term_load($transaction->tag)->name, 'title' => taxonomy_term_load($transaction->tag)->description);
+	if ($header->debited)		$cell['debited'] 	= $transaction->debited;
+	if ($header->credited)		$cell['credited']	= $transaction->credited;
+	$cell['text'] = '';
+	if ($header->balance_user) {
+		if ($transaction->credited == $user->name && !empty($transaction->debited))
+			$cell['text']	= t('From') . ' ' . $transaction->debited . '<br />';
+		else if ($transaction->debited == $user->name && !empty($transaction->credited))
+			$cell['text'] 	= $cell['text'] . t('To') . ' ' . $transaction->credited . '<br />';
+	}
+	if (!empty($transaction->initiated) && $header->text) 
+					$cell['text']		= $cell['text'] . t('By') . ' ' . $transaction->initiated . (!empty($transaction->message) ? '<br />' : ''); 
+	if ($header->text)		$cell['text']		= $cell['text'] . $transaction->message;
+	if ($header->amount)		$cell['amount']		= array('data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' .
+										($user->name != CASHBOX_WILDCARD_ALL ? ($transaction->debited == $user->name ? '-' : '+') : '') . ' ' . 
+										number_format($transaction->amount, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) .
+										'</div>',
+									'class' => $user->name != CASHBOX_WILDCARD_ALL ? ($transaction->debited == $user->name ? 'cashbox_debit' : 'cashbox_credit') : '');
+	if ($header->balance_debitee) {
+		if (empty($transaction->debited))
+			$cell['balance_debitee'] = '---';
+		else
+			$cell['balance_debitee'] = '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' .  number_format($transaction->balance_debitee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) .  '</div>';
+	}
+	if ($header->balance_creditee)	{
+		if (empty($transaction->credited))
+			$cell['balance_creditee'] = '---';
+		else 
+			$cell['balance_creditee'] = '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' .  number_format($transaction->balance_creditee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) .  '</div>';
+	}
+	if ($header->balance_user) 
+			$cell['balance'] = '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' .
+									number_format(($transaction->debited == $user->name) ? $transaction->balance_debitee : $transaction->balance_creditee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) .
+									'</div>';
+	if ($header->checksum) {
+		if (_cashbox_checksum($transaction->credited,  $transaction->debited, $transaction->initiated, $transaction->timestamp,  $transaction->message, $transaction->amount) == $transaction->token)
+			if (!variable_get('cashbox_qr', 0)) $cell['checksum']	= 'OK';
+			else 		$cell['token'] = '<span class="cashbox_qr">' . theme('mobilecode', array('data' => $base_url . 'cashbox/confirm/' . $user->name . '/' . $transaction->token, 'attributes' =>array('#provider' => 'internal', '#preset' => 'large'), 'image_alt' => $transaction->token, 'image_title' => $transaction->token, 'image_attributes' => array('width' => 80, 'height' => 80, 'class' => 'cashbox_qr'))) . '</span>';
+		else {
+			$cell['checksum']	= 'CHECKSUM MISMATCH! (This is bad!!!)';
+			drupal_set_message(t('One of your transactions (Nr. @tid) shows a checksum-mismatch. Please contact your Administrator ASAP', array('@tid' => $transaction->tid)), 'warning', true);
+		}
+		$cell['checksum'] .= '<span class="cashbox_checksum"> ' . $transaction->token . '</span>';
+	}
+
+
+	return $cell;
+
+}
 
 /**
  * Ajax-Callback function for the statement-page(r)
@@ -158,36 +313,29 @@ function _cashbox_user_display_callback($user) {
 	header("Cache-Control: no-cache, must-revalidate");
 	header("Pragma: no-cache");
 
-	$header = _cashbox_get_header(false, true, true);
-	$balances = _cashbox_fetch($user->name, variable_get('cashbox_perPage', 25), $header);
-
-	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox_print.css', array('media' => 'print'));
+	if ($user->name == CASHBOX_WILDCARD_ALL)
+		$header = new cbHeader(true, true, true, true, true, true, true, true, true, false, true);
+	else
+		$header = new cbHeader();
 
 	$rows = array();
-	$fiduser = $transID = $token_error = $display_error = false;
 
-	foreach ($balances as $balance) {
-		$rows[$balance->tid] = _cashbox_format($balance, $user, true, true);
-
-#		if ($token_error) {
-#			$rows[$balance->bid]['checked'] = (!$token_error ? '' : '<img class="ui-icon ui-icon-alert ui-state-error" style="background-color: red"/>'); 
-#			$display_error = true;
-#		}
+	$transactions = _cashbox_fetch($user->name, variable_get('cashbox_perPage', 25), $header);
 	
-	}
-	
+	foreach ($transactions as $transaction)
+		$rows[$transaction->tid] = _cashbox_format_transaction($transaction, $header, $user);
+ 
 	$html = theme('table',  array(
-		'header'	=> $header,
-		'empty'		=> t('No transactions available'),
-		'rows'		=> $rows,
-		'sticky'	=> true,
-		'caption'	=> ($display_error ? '<div class="messages error" style="width: 80%">'. t('Some balance records are inconsistent. Please contact your administrator.') . '</div><br />' : ''),
-		)
-	);
+		'header'        => $header->getHeader(),
+		'empty'         => t('No transactions available'),
+		'rows'          => $rows,
+		'sticky'        => true,
+		'attributes'	=> array('class' => array('cashbox_table')),
+	));
+
 	$html .= theme('pager', array('tags' => array()));
+
 	die($html);
-
-
 }
 
 /**
@@ -203,7 +351,6 @@ function _cashbox_checksum($credited, $debited, $initiated, $timestamp, $message
  *
  */
 function _cashbox_rebuild_checksum($tid, $signed = false) {
-	error_log('Rebuilding checksum for tid ' . $tid);
 	$data_in = db_select('cashbox', 'c')->fields('c', array('credited', 'debited', 'initiated', 'timestamp', 'amount', 'message'))->condition('tid', $tid)->execute()->fetchAssoc();
 	return db_update('cashbox')->fields(array('token' => _cashbox_checksum($data_in['credited'], $data_in['debited'], $data_in['initiated'], $data_in['timestamp'], $data_in['message'], $data_in['amount'])))->condition('tid', $tid)->execute();
 }
@@ -233,7 +380,7 @@ function _cashbox_get_header($account = false, $balance = false, $token = false)
 /**
  * Retrieves master-account / user-account data; Master-Account overrides user!
  */
-function _cashbox_fetch_data($name) {
+function _cashbox_fetch_data(&$name) {
 	if (module_exists('cb_master')) {
 		if (cb_master_is_master($name))
 			return new cbMaster($name);
@@ -243,116 +390,7 @@ function _cashbox_fetch_data($name) {
 		return user_load($name);
 	else
 		return user_load_by_name($name);
-	}
-
-/**
- * create statement
- * (provide universal format for a single transaction)
- */
-function _cashbox_format(&$transaction, $display_user, $balance = false, $token = false, $display_debited = false) {
-	global $base_url;
-	global $user;
-	$debited = NULL;
-	$credited = NULL;
-	$initiated = NULL;
-
-	switch ($transaction->credited) {
-	case NULL:
-		$credited = NULL;
-		break;
-	case $user->name:
-		$credited = $user;
-		break;
-	case $display_user->name:
-		$credited = $display_user;
-		break;
-	default:
-		$credited = _cashbox_fetch_data($transaction->credited);
-		break;
-	}
-
-	switch ($transaction->debited) {
-	case NULL:
-		$debited = NULL;
-		break;
-	case $user->name:
-		$debited = $user;
-		break;
-	case $display_user->name:
-		$debited = $display_user;
-		break;
-	default:
-		$debited = _cashbox_fetch_data($transaction->debited);
-		break;
-	}
-
-	switch ($transaction->initiated) {
-	case NULL:
-		$initiated = NULL;
-		break;
-	case $user->name:
-		$initiated = $user;
-		break;
-	case $display_user->name:
-		$initiated = $display_user;
-		break;
-	default:
-		$initiated = user_load_by_name($transaction->initiated);
-		break;
-	}
-
-	$cell = array();
-
-	$cell['tid']	= $transaction->tid;
-	$cell['timestamp']	= array('data' => format_date($transaction->timestamp, 'short'), 'class' => 'cashbox_date');
-
-	if ($display_debited)
-		$cell['account'] = ($display_user->uid == @$debited->uid && $display_user->uid != @$initiated->uid) ? $debited->name : $credited->name;
-	
-	$cell['transaction']['data']	= NULL;
-
-	if (!empty($credited) && ($display_user->name == $credited->name))
-		$cell['transaction']['data'] .=  (isset($debited->name) || $transaction->debited != NULL) ? t('From') . ': ' . ($debited ? $debited->name : $transaction->debited) . '<br />' : '';
-	if (($display_user->name == @$debited->name || @$initiated->name == $display_user->name) && (@$initiated->name != $display_user->name))
-		$cell['transaction']['data'] .=  (isset($credited->name) || $transaction->credited != NULL) ? t('To') . ': ' . ($credited ? $credited->name : $transaction->credited) . '<br />' : '';
-	if ($initiated != NULL)
-		$cell['transaction']['data'] .=  t('By') . ': ' . $initiated->name . '<br />';
-	if (!empty($transaction->message))
-	       $cell['transaction']['data'] .=	'<div class="cashbox_message">' . $transaction->message . '</div>';
-
-
-	$cell['amount']		= array(
-		'data' => '<div class="cashbox_symbol">' . variable_get('cashbox_symbol', '$') . '</div><div class="cashbox_amount">' . 
-			($display_user->name == $credited->name ? '+' : '-') . 
-			number_format($transaction->amount, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . 
-			'</div>', 
-		'class' => ($display_user->name == $credited->name ? 'cashbox_credit' : 'cashbox_debit'));
-		
-	if ($balance != false) 
-		$cell['balance']	= array(
-			'data' => '<div class="cashbox_symbol">' . 
-				variable_get('cashbox_symbol', '$') . 
-				'</div><div class="cashbox_amount">' . 
-				number_format(($display_user->name == $credited->name) ? $transaction->balance_creditee : $transaction->balance_debitee, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . 
-				'</div>', 
-			'class' => ((($display_user->name == $credited->name) ? $transaction->balance_creditee : $transaction->balance_debitee) < -variable_get('cashbox_hardlimit', 50) ?'cashbox_debit' : ''));
-		
-
-	if ($token) { 		// Recalculate token and verify
-		if (_cashbox_checksum($transaction->credited,  $transaction->debited, $transaction->initiated, $transaction->timestamp,  $transaction->message, $transaction->amount) == $transaction->token) {
-			if (!variable_get('cashbox_qr', 0))
-				$cell['token'] = '<span class="cashbox_credit">OK</span>'; 
-			else
-				$cell['token'] = '<span class="cashbox_qr">' . theme('mobilecode', array('data' => $base_url . 'cashbox/confirm/' . $user->name . '/' . $transaction->token, 'attributes' => array('#provider' => 'internal', '#preset' => 'large'), 'image_alt' => $transaction->token, 'image_title' => $transaction->token, 'image_attributes' => array('width' => 80, 'height' => 80, 'class' => 'cashbox_qr'))) . '</span>';
-		}
-		else
-			$cell['token'] = '<span class="checksum_debit">' . t('CHECKSUM MISMATCH') . '</span>';
-		$cell['token'] .= '<span class="cashbox_checksum"> ' . $transaction->token . '</span>';
-	}
- 	return $cell;
 }
-	
-	
 
 
 /**
@@ -363,6 +401,9 @@ function _cashbox_format(&$transaction, $display_user, $balance = false, $token 
  */
 function _cashbox_check_access($account = 0, $action = '') {
 	global $user; /* Get own user-data */
+
+	if (!$account)
+		$account = &$user;
 	
 	switch ($action) {
 	case 'cashbox':
@@ -388,21 +429,35 @@ function _cashbox_check_access($account = 0, $action = '') {
  * 	if limit = 0 all entries are fetched
  *
  */
-function _cashbox_fetch($username, $limit, $header = false) {
-	$query = db_select('cashbox', 'u')
-		->extend('PagerDefault')
-		->limit($limit);
-
-	if ($header != false) {
-		$query = $query->extend('TableSort')
-				->orderByHeader($header);
+function _cashbox_fetch($username, $limit, &$header = false) {
+	if ($username == CASHBOX_WILDCARD_ALL) {
+	       if (!user_access('view cashbox all_balances'))
+			return;
+	       else
+		       $username = '%';
 	}
+
+
+	$query = db_select('cashbox', 'c');
+	if ($limit != 0)
+		$query->extend('PagerDefault')->limit($limit);
+	if ($header != false)
+		$query->extend('TableSort')->orderByHeader($header->getHeader());
 	
-	$query->fields('u', array('tid', 'timestamp', 'credited', 'debited', 'message', 'initiated', 'amount', 'balance_creditee', 'balance_debitee', 'token'))
-		->condition(db_or()->condition('credited', $username)->condition('debited', $username));
-	
-		
-	return $query->execute();
+        $query->condition(db_or()->condition('credited', $username, ($username == '%') ? 'LIKE' : '=')->condition('debited', $username, ($username == '%') ? 'LIKE' : '='));
+
+	if ($header->tid) 	$query->addField('c', 'tid');
+	if ($header->timestamp)   $query->addField('c', 'timestamp');
+	if ($header->tag)         $query->addField('c', 'tag');
+	if ($header->text)        $query->addField('c', 'message');
+	if ($header->amount)      $query->addField('c', 'amount');
+	if ($header->balance_debitee || $header->balance_user) $query->addField('c', 'balance_debitee'); 
+	if ($header->balance_creditee || $header->balance_user) $query->addField('c', 'balance_creditee');
+	if ($header->checksum)	$query->addField('c', 'token');
+
+	$query->fields('c', array('initiated', 'credited', 'debited'));
+
+	return $query->execute()->fetchAll();
 }
 
 /**
@@ -411,8 +466,10 @@ function _cashbox_fetch($username, $limit, $header = false) {
  * @param argbox
  * 	Takes a user-object as argument
  */
-function cashbox_user_display($argbox) {
+function cashbox_user_display($argbox = false) {
 	global $user;
+	if (!$argbox) // If no argument is passed, it's the users own statement
+		$argbox = &$user;
 
 	drupal_add_js(drupal_get_path('module', 'cashbox') . '/jquery.url.js', array('weight' => 4));
         drupal_add_js(drupal_get_path('module', 'cashbox') . '/cashbox.callback.js', array('weight' => 5));
@@ -424,6 +481,121 @@ function cashbox_user_display($argbox) {
 		'#markup' => t('This is @user balance sheet', array('@user' => ($argbox->uid == $user->uid ? t('your') : $argbox->name . '\'s'))) . '<div id="table-container"></div>',
 	);
  	return $page_array;
+}
+
+/**
+ * Displays all transactions of a selected user
+ * callback-function for drupal_get_form
+ */
+function cashbox_display_all($form, &$form_state) {
+	global $user;
+
+	/** Make stuff pretty */
+	drupal_add_js(drupal_get_path('module', 'cashbox') . '/jquery.url.js');
+        drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox.css');
+	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox_print.css', array('media' => 'print'));
+	drupal_add_js(drupal_get_path('module', 'cashbox') . '/cb_books_callback.js');
+
+	$available_accs = array(0 => '--- ' . t('Select Account') . ' ---');
+
+	if (user_access('view cashbox all_balances')) 
+		$available_accs[t('Overview')] = array(CASHBOX_WILDCARD_OVERVIEW => t('Display all balances'), CASHBOX_WILDCARD_ALL => t('Display all transactions'));
+
+	/** Get a list of Master Accounts available to this user */
+	if (module_exists('cb_master')) {
+		foreach (cb_master_get_available_accs($user) as $id => $master)
+			$available_accs[t('Master Accounts')][$id] = $master['name'] .  "\t (" . variable_get('cashbox_symbol', '$') . ' ' .  number_format($master['balance'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . ')';
+	}
+
+	/** Get a list of users that made transactions (note to self: MySQL is a bitch!!!) **/
+	$query = db_query('SELECT DISTINCT cashbox.credited AS user FROM cashbox WHERE credited not IN (SELECT account_name FROM cashbox_masters) UNION SELECT DISTINCT cashbox.debited AS user FROM cashbox WHERE debited not IN (SELECT account_name FROM cashbox_masters)');
+	while ($row = $query->fetchAssoc()) {
+		$available_accs[t('User Accounts')][$row['user']] = $row['user'] . "\t (" . variable_get('cashbox_symbol', '$') . ' ' . number_format(_cashbox_get_current_balance($row['user']), 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . ')';
+	}
+
+
+	$form['selector'] = array(
+		'#type'		=> 'select',
+		'#options' 	=> $available_accs,
+		'#attributes'   => array('class' => array('cashbox_qr'), 'onchange' => 'initializeTableMaster(this.value)'),
+	);
+	$form['books_display'] = array(
+		'#type'         => 'markup',
+		'#markup'       => '<div id="books_display-div"> </div>',
+	);
+
+	return $form;
+}
+
+function _cashbox_format_amount($amount) {
+	return variable_get('cashbox_symbol', '$') . ' ' . number_format($amount, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ','));
+}
+/**
+ * Callback that triggers _cashbox_user_display_callback depending on passed argument
+ */
+function _cashbox_books_callback($arg) {
+	header("Content-type: text/html");
+        header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        header("Cache-Control: no-cache, must-revalidate");
+        header("Pragma: no-cache");
+
+	if ($arg == CASHBOX_WILDCARD_ALL && !user_access('view cashbox all_balances'))
+			return;
+	if ($arg == CASHBOX_WILDCARD_OVERVIEW) {
+	       if (!user_access('view cashbox all_balances'))
+			return;
+
+
+		$query = db_query('SELECT DISTINCT cashbox.credited AS user FROM cashbox WHERE credited IS NOT NULL ' .
+		       'UNION SELECT DISTINCT cashbox.debited AS user FROM cashbox WHERE debited IS NOT NULL');
+		$rows = array();
+	       $balance = 0;
+	       $balance_credits = $balance_debits = 0;
+		while ($row = $query->fetchAssoc()) {
+			$balance = _cashbox_get_current_balance($row['user']);
+			if ($balance > 0) 	$balance_credits += $balance;
+			else if ($balance < 0)	$balance_debits += $balance;
+
+			$rows[] = array(
+				array('data' => $row['user'], 'class' => array($balance > 0 ? '' : 'cashbox_debit')),
+			        array('data' => variable_get('cashbox_symbol', '$') . ' ' . number_format($balance, 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')), 'class' => array($balance > 0 ? '' : 'cashbox_debit')),
+			);
+		}
+	       $rows[] = array(array('data' => '<hr />', 'colspan' => 2));
+	       $rows[] = array(
+		       array('data' => t('Total Assets'), 'class' => $balance_credits >= 0 ? 'cashbox_credit' : 'cashbox_debit'),
+		       array('data' => _cashbox_format_amount($balance_credits), 'class' => $balance_credits >= 0 ? 'cashbox_credit' : 'cashbox_debit')
+	       );
+	       $rows[] = array(
+		       array('data' => t('Total Receivables'), 'class' => $balance_debits >= 0 ? 'cashbox_credit' : 'cashbox_debit'),
+		       array('data' => _cashbox_format_amount($balance_debits), 'class' => $balance_debits >= 0 ? 'cashbox_credit' : 'cashbox_debit')
+	       );
+	       $rows[] = array(
+		       array('data' => t('Total Balance'), 'header' => true), 
+		       array('data' => _cashbox_format_amount($balance_debits + $balance_credits), 'header' => true),
+	       );
+	       
+
+		die(theme('table', array(
+			'header'	=> array(t('Name'), t('Balance')),
+			'empty'		=> t('No transactions available'),
+			'rows'		=> $rows,
+			'sticky'	=> true,
+			'caption'	=> t('Balance Overview'))));	
+	       
+	       }
+	else if (is_numeric($arg) && $arg == 0)
+		return;
+	else if (is_numeric($arg) && $arg != 0 && module_exists('cb_master')) {
+		$account = new cbMaster($arg);
+	}
+	else if (!is_numeric($arg)) {
+		$account->name = $arg;
+	} else
+		return;
+
+	_cashbox_user_display_callback($account);
 }
 
 /** 
@@ -469,10 +641,4 @@ function cashbox_user_update(&$edit, $account, $category) {
 		 'progress_message' => t('Rebuilding Transaction-Checksums @current / @total'),
 		 'operations' => $batch_op,
 		 ));
-
-	error_log('user_update event occured! - ' . $affected . ' accounts updated!');
-
-
-/*	error_log('edit: ' . print_r($edit, true));
-error_log('category: ' . print_r($category)); */
-}
+	}

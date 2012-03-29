@@ -45,14 +45,14 @@ class cbMaster {
  * Implements hook_menu()
  */
 function cb_master_menu() {
-	global $user;
 	$items = array();
 
-	$items['admin/config/cashbox.master'] = array(
-		'title'	=> 'Cashbox Admin',
+	$items['admin/config/cashbox/master'] = array(
+		'title'	=> 'Master Accounts Admin',
 		'description' => 'Configure Cashbox Masters',
 		'access arguments' => array('access administration pages'),
 		'page callback' => 'cb_master_admin',
+		'parent'	=> 'cashbox',
 		'type' => MENU_NORMAL_ITEM,
 		'file' => 'cb_master.admin.inc',
 	);
@@ -85,22 +85,6 @@ function cb_master_menu() {
 		'access arguments' => array('view keyword autocomplete'),
 		'page callback'	=> '_cb_master_callback_autocomplete',
 		'type' => MENU_CALLBACK,
-	);
-	$items['cashbox/master/books'] = array(
-		'title'         => t('Account Journal'),
-		'page callback' => 'drupal_get_form',
-		'page arguments' => array('cb_master_books'),
-		'access callback' => '_cb_master_check_access',
-#		'access arguments' => array($user),
-		'type'  => MENU_NORMAL_ITEM,
-		'menu_name'     => 'user-menu',
-	);
-	$items['cashbox/master/books/callback/%'] = array(
-		'title'         => t('Account Journal'),
-		'page callback' => '_cb_master_books_ajax',
-		'page arguments' => array(4),
-		'access callback' => '_cb_master_check_access',
-		'type'  => MENU_CALLBACK,
 	);
 
 return $items;
@@ -140,9 +124,8 @@ function _cb_master_check_access($book= false) {
 	return false;
 }
 
-function cb_master_books($form, &$form_state) {
-	global $user;
-	$available_accs = array('0' => t('Select Master Account'));
+function cb_master_get_available_accs(&$user) {
+	$available_accs = array();
 	$query = db_select('cashbox_masters', 'c')->fields('c', array('cbm_id', 'account_name', 'account_group', 'current_balance'));
 	$condition = db_or();
 	foreach ($user->roles as $rid=>$role) 
@@ -153,66 +136,14 @@ function cb_master_books($form, &$form_state) {
 	while ($row = $result->fetchAssoc()) {
 		foreach (explode('|', $row['account_group']) as $ass_role)
 			if (isset($user->roles[$ass_role])) {
-				$available_accs[$row['cbm_id']] =  $row['account_name'] . " \t(" . variable_get('cashbox_symbol', '$') . ' ' . number_format($row['current_balance'], 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . ')';
+				$available_accs[$row['cbm_id']] =  array('name' => $row['account_name'], 'balance' =>  $row['current_balance']);
 			}
 	}
 
-	drupal_add_js(drupal_get_path('module', 'cashbox') . '/jquery.url.js');
-	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox.css');
-	drupal_add_css(drupal_get_path('module', 'cashbox') . '/cashbox_print.css', array('media' => 'print'));
-	drupal_add_js(drupal_get_path('module', 'cb_master') . '/cb_callback.js');
+	return $available_accs;
 
-	$form['selected_acc'] = array(
-		'#type'		=> 'select',
-		'#options'	=> $available_accs,
-		'#attributes'	=> array('class' => array('cashbox_qr'), 'onchange' => 'initializeTableMaster(this.value)'),
-	);	
-	$form['books_display'] = array(
-		'#type'		=> 'markup',
-		'#markup'	=> '<div id="books_display-div"> </div>',
-	);
-
-
-	return $form;
 }
 
-function _cb_master_books_display($form, $form_state) {
-	drupal_add_js('initializeTableMaster(' . $form_state['values']['selected_acc'] . ');', 'inline');
-	return;
-}
-
-function _cb_master_books_ajax($acc = false) {
-        header("Content-type: text/html");
-	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
-	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-	header("Cache-Control: no-cache, must-revalidate");
-	header("Pragma: no-cache");
-
-	$cbM = new cbMaster($acc);
-
-
-	$total = db_query('SELECT COUNT(tid) FROM {cashbox} WHERE cashbox.debited = :cbM OR cashbox.credited = :cbM', array(':cbM' => $cbM->name))->fetchField();
-	$page = pager_default_initialize($total, variable_get('cashbox_perPage', 25));
-
-        $header = _cashbox_get_header(false, true, true);
-	$balances = _cashbox_fetch($cbM->name, variable_get('cashbox_perPage', 25), $header);
-
-	$rows = array();
-	foreach ($balances as $balance) 
-		$rows[$balance->tid] = _cashbox_format($balance, $cbM, true, true);
-
-	$html = theme('table',  array(
-		'header'        => $header,
-		'empty'         => t('No transactions available'),
-		'rows'          => $rows,
-		'sticky'        => true,
-		'caption'       => t('Transactions for @master', array('@master' => $cbM->name)),
-		)
-	);
-	$html .= theme('pager', array('path' => array('href' =>'foo'), '#ajax' => 'foo'));
-
-	die($html);
-}
 /**
  * Returns an associated array with cbm_id (the ID-Number of the Master account) and cbm_name (the human-readable name of the Master account)
  *

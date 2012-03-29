@@ -10,8 +10,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2012-03-21 18:49+0100\n"
-"PO-Revision-Date: 2012-03-22 16:41+0100\n"
+"POT-Creation-Date: 2012-03-29 05:20+0200\n"
+"PO-Revision-Date: 2012-03-29 05:21+0100\n"
 "Last-Translator: Daniel Zauner [lucid_nix] <translate@lucidnix.pyxis.uberspace.de>\n"
 "Language-Team: German <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
@@ -107,15 +107,15 @@ msgstr "Dieser Name wird bereits verwendet"
 msgid "Master Account sucessfully updated!"
 msgstr "Das Master-Konto wurde geändert!"
 
-#: cb_master.admin.inc:179
+#: cb_master.admin.inc:177
 msgid "Rebuilding Transaction-Checksums"
 msgstr "Regeneriere die Prüfsummen der Transaktionen"
 
-#: cb_master.admin.inc:180
+#: cb_master.admin.inc:178
 msgid "Rebuilding Transaction-Checksums @current / @total"
 msgstr "Regeneriere die Prüfsummen der Transaktionen @current / @total"
 
-#: cb_master.admin.inc:190
+#: cb_master.admin.inc:188
 msgid "New Master Account successfully created"
 msgstr "Neues Master-Konto erstellt"
 
@@ -135,27 +135,11 @@ msgstr "Ausgehende Transaktionen erlauben"
 msgid "User may transfer currency from an assigned Master Account"
 msgstr "Der Benutzer darf Beträge vom zugeordneten Master-Konto überweisen"
 
-#: cb_master.module:90;99
-msgid "Account Journal"
-msgstr "Kassenbuch"
-
-#: cb_master.module:145
-msgid "Select Master Account"
-msgstr "Master-Konto auswählen"
-
-#: cb_master.module:206
-msgid "No transactions available"
-msgstr "Es liegen keine Transaktionen vor"
-
-#: cb_master.module:209
-msgid "Transactions for @master"
-msgstr "Transaktionen für @master"
+#: cb_master.module:51
+msgid "Master Accounts Admin"
+msgstr "Master-Konten Verwaltung"
 
 #: cb_master.module:52
-msgid "Cashbox Admin"
-msgstr "Cashbox Verwaltung"
-
-#: cb_master.module:53
 msgid "Configure Cashbox Masters"
 msgstr "Cashbox Masters konfigurieren"
 
@@ -186,3 +170,4 @@ msgstr "Master-Konten (mit einer Benutzer-Rolle assoziiert)"
 #: cb_master.info:0
 msgid "Cashbox"
 msgstr ""
+

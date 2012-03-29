@@ -1,3 +1,7 @@
+.cashbox_table {
+	font-size: 0.9em;
+}
+
 td.cashbox_credit {
   color: #33bb33;
   font-weight: bold;

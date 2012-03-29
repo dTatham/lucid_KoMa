@@ -4,6 +4,7 @@ core = 7.x
 package = "Cashbox"
 configure = admin/config/cashbox
 #dependencies[] = trigger
+dependencies[] = taxonomy
 
 files[] = cashbox.admin.inc
 scripts[] = cashbox.callback.js

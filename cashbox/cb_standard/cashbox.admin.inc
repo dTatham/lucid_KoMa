@@ -51,6 +51,13 @@ function cashbox_admin($form, &$form_state) {
 			'#title'	=> t('Display checksums as QR-Codes'),
 			'#default_value' => variable_get('cashbox_qr', 1),
 		);
+	$form['general']['cashbox_taxonomy_default'] = array(
+		'#type'		=> 'select',
+		'#title'	=> t('Default Transaction-Type'),
+		'#options'	=> _cashbox_get_transaction_terms(),
+		'#default_value' => variable_get('cashbox_taxonomy_default'),
+		'#description' 	=> t('Select the default transaction-type. You can change the vocabulary in the !tax section', array('!tax' => l(t('Taxonomy'), 'admin/structure/taxonomy/cb_transactions'))),
+	);	
 	$form['account'] = array(
 		'#type' 	=> 'fieldset',
 		'#title' 	=> t('Account Settings'),
@@ -80,6 +87,7 @@ function cashbox_admin($form, &$form_state) {
 
 	return system_settings_form($form);
 }
+
 
 /**
   * Implements validation from the Form API.

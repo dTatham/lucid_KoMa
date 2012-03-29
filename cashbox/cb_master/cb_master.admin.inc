@@ -49,7 +49,7 @@ function cb_master_delete($form, &$form_state, $preseed) {
 		'#value'	=> t('Delete'),
 	);
 	$form['cb_master_delete']['cancel'] = array(
-		'#markup'	=> l(t('Cancel'), 'admin/config/cashbox.master'),
+		'#markup'	=> l(t('Cancel'), 'admin/config/cashbox/master'),
 	);
 
 	return $form;
@@ -64,7 +64,7 @@ function cb_master_delete_validate($form, &$form_state) {
 function cb_master_delete_submit($form, &$form_state) {
 	db_query('DELETE FROM cashbox_masters WHERE cbm_id = :cbm_id', array(':cbm_id' => $form_state['values']['cbm_id']));
 	drupal_set_message(t('Master Account successfully delelted.'));
-	$form_state['redirect'] = 'admin/config/cashbox.master';
+	$form_state['redirect'] = 'admin/config/cashbox/master';
 }
 /**
  * Called by MENU_Callback:
@@ -121,7 +121,7 @@ function cb_master_dispatch($form, &$form_state, $preseed = NULL) {
 		'#value'	=> t('Save'),
 	);
 	$form['cb_master_new']['cancel'] = array(
-		'#markup'	=> l(t('Cancel'), 'admin/config/cashbox.master'),
+		'#markup'	=> l(t('Cancel'), 'admin/config/cashbox/master'),
 	);
 	if ($preseed != NULL)
 		$form['cb_master_new']['cbm_id'] = array(
@@ -187,6 +187,6 @@ function cb_master_dispatch_submit($form, &$form_state) {
 		))->execute();	
 		drupal_set_message(t('New Master Account successfully created'));
 	}
-	$form_state['redirect'] = 'admin/config/cashbox.master';
+	$form_state['redirect'] = 'admin/config/cashbox/master';
  
 }
