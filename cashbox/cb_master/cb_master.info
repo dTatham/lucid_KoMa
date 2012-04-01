@@ -1,7 +1,7 @@
 name = Cashbox Masters
 description = Master Accounts (not associated with user-accounts)
 core = 7.x
-package = "Cashbox"
+package = "lucid_KoMa"
 configure = admin/config/cashbox.master
 dependencies[] = cashbox
 #dependencies[] = trigger
