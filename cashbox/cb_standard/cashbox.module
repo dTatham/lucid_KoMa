@@ -508,7 +508,7 @@ function cashbox_display_all($form, &$form_state) {
 	}
 
 	/** Get a list of users that made transactions (note to self: MySQL is a bitch!!!) **/
-	$query = db_query('SELECT DISTINCT cashbox.credited AS user FROM cashbox WHERE credited not IN (SELECT account_name FROM cashbox_masters) UNION SELECT DISTINCT cashbox.debited AS user FROM cashbox WHERE debited not IN (SELECT account_name FROM cashbox_masters)');
+	$query = db_query('SELECT DISTINCT cashbox.credited AS user FROM cashbox WHERE credited not IN (SELECT account_name FROM cashbox_masters) AND credited IS NOT NULL UNION SELECT DISTINCT cashbox.debited AS user FROM cashbox WHERE debited not IN (SELECT account_name FROM cashbox_masters) AND DEBITED IS NOT NULL');
 	while ($row = $query->fetchAssoc()) {
 		$available_accs[t('User Accounts')][$row['user']] = $row['user'] . "\t (" . variable_get('cashbox_symbol', '$') . ' ' . number_format(_cashbox_get_current_balance($row['user']), 2, variable_get('cashbox_decimal', '.'), variable_get('cashbox_thousand', ',')) . ')';
 	}
